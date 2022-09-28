@@ -5,7 +5,7 @@
 #    pip-compile pod_metadata_extractor/runtime/requirements.in
 #
 boto3==1.24.51
-    # via -r pod_metadata_extractor/runtime/requirements.in
+    # via -r requirements.in
 botocore==1.27.51
     # via
     #   boto3
@@ -27,8 +27,8 @@ jmespath==1.0.1
     #   boto3
     #   botocore
 kubernetes==24.2.0
-    # via -r pod_metadata_extractor/runtime/requirements.in
-oauthlib==3.2.0
+    # via -r requirements.in
+oauthlib==3.2.1
     # via requests-oauthlib
 pyasn1==0.4.8
     # via
