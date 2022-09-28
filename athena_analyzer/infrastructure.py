@@ -198,8 +198,14 @@ class AthenaAnalyzer(Construct):
         query_cross_az_traffic_by_app_path: str,
         invokation_frequency: Duration,
     ) -> str:
+        query_cross_az_traffic_by_app = ""
+
         with open(query_cross_az_traffic_by_app_path, "r") as file:
-            query_cross_az_traffic_by_app = file.read()
+            for line in file:
+                # Skip comment-lines that start with '#'
+                if line.startswith("#"):
+                    continue
+                query_cross_az_traffic_by_app += line
 
         query_cross_az_traffic_by_app = query_cross_az_traffic_by_app.format(
             athena_results_table_name=athena_results_table.table_name,
