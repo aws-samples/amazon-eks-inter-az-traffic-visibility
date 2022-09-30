@@ -18,7 +18,7 @@ Let's build...
 ### Prerequisites
 
 * An AWS Account
-* Shell environment with [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) installed and Configured (e.g., [cloud9](https://aws.amazon.com/cloud9/)
+* Shell environment with [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) installed and Configured (e.g., [cloud9](https://aws.amazon.com/cloud9/))
 * IAM role with policy permissions, that [deploys the Amazon EKS cluster](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html), and the AWS CDK resources
 * [Kubectl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html)
 * [Amazon EKS command line tool](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html) ([eksctl](https://eksctl.io/)), installed and configured
