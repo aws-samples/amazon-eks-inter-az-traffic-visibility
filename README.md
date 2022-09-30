@@ -1,7 +1,7 @@
 ## Amazon EKS inter-az traffic visibility
 
 The project implements an Amazon EKS Cross-AZ Pod to Pod network bytes visability
-It is based on this blog: [Link to Blog]
+It is based on this (detailed) blog: [Link to Blog]
 
 ## Solution overview
 
@@ -10,47 +10,23 @@ Our solution is based on 2 boilerplates:
 * An Amazon VPC and an Amazon EKS cluster.
 * A Python based AWS CDK stack which implements an AWS Lambda Function, Amazon Athena Tables & Queries, and all other required resources and configurations.
 
-The following diagram depicts how the extract, transform, store and query process will occur.  
-*(This flow represents an interactive console user which manually executes 1, 3, 4)*
-
-1. The Pods Metadata Extractor lambda function connects to the EKS Cluster API endpoint.  
-    *(It Authenticates and Authorised using a designated attached IAM Role mapped to a k8s RBAC identity).*  
-     *We follow the least privilege paradigm allowing only the get and list API verbs.*
-    
-    The extracted data is then transformed and stored on an Amazon S3 bucket in CSV format.
-2. [VPC Flow logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html) are enabled on the VPC level, records are aggregated and stored on an S3 Bucket.  
-    *(This flow is a continues & in-depended of flow 1 above)*
-3. Execution of the Athena named query joins both data sources.  
-    The query then transforms and aggregates the enriched result, storing It in a [parquet](https://en.wikipedia.org/wiki/Apache_Parquet) format on an S3 Bucket.
-4. Lastly, the user executes a simple **SELECT** query which returns the Cross-AZ Pod to Pod data records and their corresponding sum of transferred network bytes (**Egress**) column. 
-    Results are displayed on-screen & saved into a designated S3 bucket.  
-
-Amazon EventBridge uses a schedule rule (Hourly), executing a step function state machine workflow which will automate Steps 1 and 3, storing the results on a pre-created S3 Bucket.
-
 ![diagram](docs/diagram2.png)
 
 
 Let's build...
 
-## Walkthrough
-
-The walkthrough consists of 3 main steps:
-
-* Step 1: Deployment of the EKS Cluster
-* Step 2: Deployment of the CDK Stack
-* Step 3: Execution & Query (AWS Lambda and Amazon Athena queries)
-
 ### Prerequisites
 
 * An AWS Account
-* Shell environment with [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) Installed and Configured
-* IAM Role with policy permissions, allowing to [deploy the EKS Cluster](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html), and the CDK resources
+* Shell environment with [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) installed and Configured (e.g., [cloud9](https://aws.amazon.com/cloud9/)
+* IAM role with policy permissions, that [deploys the Amazon EKS cluster](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html), and the AWS CDK resources
 * [Kubectl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html)
-* [Amazon EKS command line tool](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html) ([eksctl](https://eksctl.io/)), Installed and Configured
-* AWS CDK and its dependencies (Provided at step 2)
-* [Amazon Athena query results S3 Bucket](https://docs.aws.amazon.com/athena/latest/ug/querying.html#query-results-specify-location-console) (Interactive execution)
+* [Amazon EKS command line tool](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html) ([eksctl](https://eksctl.io/)), installed and configured
+* Python3 and Node Package Manager (NPM)
+* AWS CDK and its dependencies (provided in Step 2)
+* [Amazon Athena query results Amazon S3 bucket](https://docs.aws.amazon.com/athena/latest/ug/querying.html#query-results-specify-location-console) (interactive execution)
 
-### Step 1: Deploy an EKS Cluster
+### Step 1: Deploy an Amazon EKS Cluster
 
 #### **Set the environment**
 
@@ -98,8 +74,8 @@ ip-192-168-64-199.us-east-2.compute.internal   Ready    <none>   20m   v1.22.9-e
 
 ```
 cd ~
-git clone https://gitlab.aws.dev/aws-israel-sa-scaling-team/cdk-eks-inner-az-observability
-cd cdk-eks-inner-az-observability
+git clone https://github.com/aws-samples/amazon-eks-inter-az-traffic-visibility
+cd amazon-eks-inter-az-traffic-visibility
 ```
 
 #### Deploy the demo application
@@ -109,9 +85,9 @@ cd kubernetes/demoapp/
 kubectl apply -f .
 ```
 
-Explore the demoapp YAMLs, the application consists of a single Pod (http client) which runs a curl http loop on start. 
-The target is a k8s service wired Into 2 nginx server pods (Endpoints).
-The server-dep k8s deployment is implementing [pod topology spread constrains](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/), spreading the Pods across the distinct availability zones.
+Explore the demoapp YAMLs, the application consists of a single pod (i.e., http client) that runs a curl http loop on start. 
+The target is a k8s service wired into 2 nginx server pods (Endpoints).
+The server-dep k8s deployment is implementing [pod topology spread constrains](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/), spreading the pods across the distinct AZs.
 
 #### Validate the demo application
 
@@ -127,7 +103,7 @@ client-dep   1/1     1            1           14s
 server-dep   2/2     2            2           14s
 ```
 
-#### Validate that the server Pods are spread across Nodes/AZs
+#### Validate that the server pods are spread across Nodes and AZs
 
 ```
 kubectl get pods -l=app=server --sort-by="{.spec.nodeName}" -o wide
@@ -146,13 +122,13 @@ server-dep-797d7b54f-8m6hx   1/1     Running   0          61s   192.168.89.235  
 Create a Python virtual environment and install the dependencies
 
 ```
-cd ~/cdk-eks-inner-az-observability
+cd ~/amazon-eks-inter-az-traffic-visibility
 python3 -m venv .venv
 source .venv/bin/activate
 ./scripts/install-deps.sh
 ```
 
-Our CDK Stack requires the VPCID and the eks CLUSTERNAME
+Our AWS CDK stack requires the VPC ID and the Amazon EKS cluster name
 
 ```
 export CLUSTERNAME="cross-az"
@@ -163,21 +139,21 @@ echo $CLUSTERNAME;echo $VPCID
 #### Deploy the stack
 
 ```
-cdk bootstrap
+npx cdk bootstrap
 npx cdk deploy CdkEksInterAzVisibility --parameters eksClusterName=$CLUSTERNAME --parameters eksVpcId=$VPCID
 ```
 
-#### Authorise the Lambda function (k8s client)
+#### Authorise the AWS Lambda function (k8s client)
 
 Lets get the **Pod Metadata Extractor** **IAM Role** 
-*(Used by the Lambda function to authenticate and authorise when connecting to the EKS Cluster API)*
+*(Used by the AWS Lambda function to authenticate and authorise when connecting to the Amazon EKS Cluster API.)*
 
 ```
 export POD_METADATA_EXTRACTOR_IAM_ROLE=$(aws cloudformation describe-stacks --stack-name "CdkEksInterAzVisibility" --output json --query "Stacks[0].Outputs[0].OutputValue" | sed -e 's/^"//' -e 's/"$//')
 echo $POD_METADATA_EXTRACTOR_IAM_ROLE
 ```
 
-Create a ClusterRole and binding for the **Pod Metadata Extractor** Lambda Function
+Create a ClusterRole and binding for the **Pod Metadata Extractor** AWS Lambda Function
 
 ```
 kubectl apply -f kubernetes/pod-metadata-extractor-clusterrole.yaml
@@ -209,84 +185,40 @@ arn:aws:iam::555555555555:role/eksctl-cross-az-nodegroup-ng-1-NodeInstanceRole-I
 arn:aws:iam::555555555555:role/pod-metadata-extractor-role                                      eks-inter-az-visibility-binding         eks-inter-az-visibility-group
 ```
 
-### Step 3: Execute, Query and Watch results
+### Step 3: Viewing the process and results Interactively
 
-The step functions workflow will execute the lambda function and if successful, shall execute the Athena named query.
-
-For the purpose of the walkthrough we will force a manual execution, interactively.  
-Head over to the AWS Console Step Functions area and:  
-
-* Click the "**pod-metadata-extractor-orchestrator**" state machine
-* On the "Execution pane", click the "**Start execution**", accept defaults and click "**Start execution**"
-* After few seconds the "**Graph inspector**" should look like this:
-
-![state](docs/statem-diagram.png)
-
-* Inspect the output result stored on the CDK pre-created S3 Bucket.  
-*(You can get the bucket name by Inspecting the “*Definition*” tab of the "pod-metadata-extractor-orchestrator" *state machine*)*. 
-
-See an example output:
-
-```
-"ResultConfiguration": {
-"OutputLocation": "s3://cdkeksinterazvisibility-athenaanalyzerathenaresul-4444444444444/query_results/"
-```
-
-The Step function allows you to implement a batch process workflow which can be used to query the result and visualise or analyse It for many purposes. In the next section we shall execute the entire process manually and interactively in order the view the query results on the Athena console.
-
-
-#### Viewing the process and results Interactively
-
-* Head over to the Amazon Athena section.  
-*(Query results bucket should have been set, see Prerequisites section. This should be a transient In-Region S3 bucket for the purpose of viewing the results, interactively)*. 
-
-* On the Athena query pane, Start a new query (+ Sign) and execute/run the below query:
+* Head over to the [Amazon Athena](https://us-east-2.console.aws.amazon.com/athena/home?region=us-east-2#/query-editor) section.  
+*(Query results bucket should have been set, see Prerequisites section. This should be a transient In-Region Amazon S3 bucket for the purpose of viewing the results, interactively)*
+   
+* On the Athena query pane, Start a new query (+ Sign) and run the below query:
 
 ```
 SELECT * FROM "athena-results-table" ORDER BY "timestamp" DESC, "bytes_transfered";
 ```
 
-Expected output:
-
-![results](docs/athena-results.png)
-
 Examine the results!
 
 ## Considerations
 
-* Cost: While the blueprints use minimal resources, deploying those blueprints will incur cost.
-* The Pods Metadata Extractor Lambda function will get all Pods (labeled: “app”) across all namespaces.  
-This will add extra load on the API Servers. Enable & Observe [control plane Metrics](https://aws.github.io/aws-eks-best-practices/reliability/docs/controlplane/#monitor-control-plane-metrics), optimise at which interval/time the function shall be executed.
-* In large scale busy clusters consider on scoping the function to get Pods in a specific namespace(s)
-* In EKS clusters where Pod churn is high, results may be inconsistent, In this use-case consider to schedule the Amazon EventBridge rule more frequently 
-* The solution **was not designed** to be used as a chargeback **nor for any billing purposes**
-
-## Conclusion
-
-In this post, We have build a solution which provides a Cross-AZ Pod to Pod network bytes visibility inside an Amazon EKS Clusters using the AWS VPC CNI Plug-in.
-I wanted to share that prior on building It we spoke to many AWS customers. 
-One of the core design tenets we followed (As a result of the feedback) is to introduce a solution which does not require the customers to deploy any operational k8s constructs.   
-Those constructs (DaemonSets/Deployments) often mandates privileged access to the underlying nodes and their network namespace.  
-We cannot wait to see how will the community improve/extend this solution, did I mentiond that we are open to review pull requests? [Kobi, Link to repo]
+* See full blog for detailed considerations
 
 ## Cleanup
 
 ### Destroy the CDK Stack
 
 ```
+cd ~/amazon-eks-inter-az-traffic-visibility
 source .venv/bin/activate
-cd ~/cdk-eks-inner-az-observability
 npx cdk destroy CdkEksInterAzVisibility
 aws cloudformation delete-stack --stack-name CDKToolkit
 ```
+If no longer needed, [delete the unneeded S3 buckets](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-bucket.html)
 
 ### Destroy the EKS cluster
 
 ```
 eksctl delete cluster --name=${CLUSTERNAME}
 ```
-
-
 
 ## Security
 
