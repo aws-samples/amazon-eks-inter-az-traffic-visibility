@@ -206,7 +206,9 @@ This flow can be used if batch processing background flow is desired in cases yo
 
 ## Considerations
 
-* See full blog for detailed considerations
+* Cost: While the blueprints use minimal resources, deploying them incurs cost.
+
+*See full blog for detailed considerations*
 
 ## Cleanup
 
