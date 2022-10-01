@@ -1,4 +1,4 @@
-## Amazon EKS inter-az traffic visibility
+## Amazon EKS cross-az traffic visibility
 
 The project implements an Amazon EKS Cross-AZ Pod to Pod network bytes visability
 It is based on this (detailed) blog: [Link to Blog]
