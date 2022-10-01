@@ -198,6 +198,12 @@ SELECT * FROM "athena-results-table" ORDER BY "timestamp" DESC, "bytes_transfere
 
 Examine the results!
 
+## Non-Interactive flow of the solution
+
+The CDK stack will also deploy a step function workflow that will run the entire flow in a batch manner (hourly).
+The flow is triggered using Amazon Event Bridge (see diagram).
+This flow can be used if batch processing background flow is desired in cases you might wish to integrate with other platforms that will consume this data (Grafana, Prometheus)
+
 ## Considerations
 
 * See full blog for detailed considerations
