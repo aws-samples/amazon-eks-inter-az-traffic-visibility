@@ -86,8 +86,7 @@ class EksInterAzVisibility(Stack):
         server_access_logs_bucket = s3.Bucket(
             self,
             "Server-Access-Logs",
-            removal_policy=RemovalPolicy.DESTROY,
-            auto_delete_objects=True,
+            removal_policy=RemovalPolicy.RETAIN,
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             encryption=s3.BucketEncryption.S3_MANAGED,
             enforce_ssl=True,
