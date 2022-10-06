@@ -185,8 +185,15 @@ arn:aws:iam::555555555555:role/eksctl-cross-az-nodegroup-ng-1-NodeInstanceRole-I
 arn:aws:iam::555555555555:role/pod-metadata-extractor-role                                      eks-inter-az-visibility-binding         eks-inter-az-visibility-group
 ```
 
+>⚠ **At this point wait few minutes allowing the VPC Flow Logs to publish, then cont. to Step 3**
+
 ### Step 3: Viewing the process and results Interactively
 
+* On the CLI get the state machine ARN and start an execution
+```
+aws stepfunctions list-state-machines #capture the "stateMachineArn" 
+aws stepfunctions start-execution --state-machine-arn "arn:aws:states:us-east-2:555555555555:stateMachine:pod-metadata-extractor-orchestrator"
+```
 * Head over to the [Amazon Athena](https://us-east-2.console.aws.amazon.com/athena/home?region=us-east-2#/query-editor) section.  
 *(Query results bucket should have been set, see Prerequisites section. This should be a transient In-Region Amazon S3 bucket for the purpose of viewing the results, interactively)*
    
@@ -200,8 +207,8 @@ Examine the results!
 
 ## Non-Interactive flow of the solution
 
-The CDK stack will also deploy a step function workflow that will run the entire flow in a batch manner (hourly).
-The flow is triggered using Amazon Event Bridge (see diagram).
+The CDK stack will also deploy a step functions workflow that will run the entire flow in a batch manner (hourly).
+The flow is triggered using Amazon EventBridge (see diagram).
 This flow can be used if batch processing background flow is desired in cases you might wish to integrate with other platforms that will consume this data (Grafana, Prometheus)
 
 ## Considerations
