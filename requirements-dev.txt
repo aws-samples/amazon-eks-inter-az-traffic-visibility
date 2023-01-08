@@ -32,7 +32,7 @@ future==0.18.2
     # via radon
 gitdb==4.0.9
     # via gitpython
-gitpython==3.1.27
+gitpython==3.1.30
     # via bandit
 idna==3.3
     # via requests
