@@ -28,7 +28,7 @@ jmespath==1.0.1
     #   botocore
 kubernetes==24.2.0
     # via -r requirements.in
-oauthlib==3.2.1
+oauthlib==3.2.2
     # via requests-oauthlib
 pyasn1==0.4.8
     # via
