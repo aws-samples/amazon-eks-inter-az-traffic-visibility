@@ -89,6 +89,7 @@ class EksInterAzVisibility(Stack):
             removal_policy=RemovalPolicy.RETAIN,
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             encryption=s3.BucketEncryption.S3_MANAGED,
+            object_ownership=s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
             enforce_ssl=True,
         )
 

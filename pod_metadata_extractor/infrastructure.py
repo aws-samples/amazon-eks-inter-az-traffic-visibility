@@ -69,6 +69,7 @@ class PodMetaDataExtractor(Construct):
             encryption=s3.BucketEncryption.S3_MANAGED,
             enforce_ssl=True,
             server_access_logs_bucket=server_access_logs_bucket,
+            object_ownership=s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
         )
         return bucket
 
