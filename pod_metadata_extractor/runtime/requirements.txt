@@ -5,7 +5,7 @@
 #    pip-compile --resolver=backtracking pod_metadata_extractor/runtime/requirements.in
 #
 boto3==1.26.109
-    # via -r pod_metadata_extractor/runtime/requirements.in
+    # via -r requirements.in
 botocore==1.29.109
     # via
     #   boto3
@@ -27,7 +27,7 @@ jmespath==1.0.1
     #   boto3
     #   botocore
 kubernetes==26.1.0
-    # via -r pod_metadata_extractor/runtime/requirements.in
+    # via -r requirements.in
 oauthlib==3.2.2
     # via requests-oauthlib
 pyasn1==0.4.8
@@ -42,7 +42,7 @@ python-dateutil==2.8.2
     #   kubernetes
 pyyaml==6.0
     # via kubernetes
-requests==2.28.2
+requests==2.31.0
     # via
     #   kubernetes
     #   requests-oauthlib
