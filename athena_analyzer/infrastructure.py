@@ -122,6 +122,11 @@ class AthenaAnalyzer(Construct):
             data_format=glue_alpha.DataFormat.CSV,
             bucket=pod_metadata_extractor_bucket,
         )
+
+        # Inject skip.header.line.count = 1 Glue Table Propertie
+        cfn_pods_table = pods_table.node.default_child
+        cfn_pods_table.add_override("Properties.TableInput.Parameters.skip\.header\.line\.count", "1")
+
         return pods_table
 
     def __create_flow_logs_table(
