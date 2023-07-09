@@ -135,20 +135,20 @@ def get_pods_info(nodes_azs: dict[str, str]) -> dict[str, str]:
     pods = v1.list_pod_for_all_namespaces(label_selector="app", watch=False)
 
     for pod in pods.items:
-        info = {
-            "name": pod.metadata.name,
-            "ip": pod.status.pod_ip,
-            "app": pod.metadata.labels.get("app", "<none>"),
-            "node": pod.spec.node_name,
-            "az": nodes_azs.get(pod.spec.node_name, "<none>"),
-        }
-
         conditions = pod.status.conditions
         ready_condition = next(filter(lambda cond: cond.type == "Ready", conditions))
         pod_creation_time = ready_condition.last_transition_time.strftime(
             TIME_DATE_FORMAT
         )
-        info["creation_time"] = pod_creation_time
+
+        info = {
+            "name": pod.metadata.name,
+            "ip": pod.status.pod_ip,
+            "app": pod.metadata.labels.get("app", "<none>"),
+            "creation_time": pod_creation_time,
+            "node": pod.spec.node_name,
+            "az": nodes_azs.get(pod.spec.node_name, "<none>"),
+        }
 
         pods_info.append(info)
 
@@ -160,9 +160,12 @@ def create_pods_metadata_csv_file(pods_info: dict[str, str]) -> str:
     Creates a local /tmp/pods_metadata.csv file before uploading the pods metadata to S3
     """
     file_path = f"/tmp/{PODS_METADATA_FILENAME}"
+
+    pod_header_row = ",".join(pods_info[0].keys())
     pod_data_rows = [",".join(info.values()) for info in pods_info]
 
     with open(file_path, "w") as f:
+        f.write(f"{pod_header_row}\n")
         f.write("\n".join(pod_data_rows))
 
     return file_path

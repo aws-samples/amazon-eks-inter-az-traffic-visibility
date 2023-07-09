@@ -21,7 +21,7 @@ pod_table_columns = [
     glue_alpha.Column(name="app", type=glue_alpha.Schema.STRING),
     glue_alpha.Column(name="creation_time", type=glue_alpha.Schema.STRING),
     glue_alpha.Column(name="node", type=glue_alpha.Schema.STRING),
-    glue_alpha.Column(name="labels", type=glue_alpha.Schema.STRING),
+    glue_alpha.Column(name="az", type=glue_alpha.Schema.STRING),
 ]
 
 # ${az-id} ${flow-direction} ${pkt-srcaddr} ${pkt-dstaddr} ${start} ${bytes}
