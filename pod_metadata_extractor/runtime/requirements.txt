@@ -5,14 +5,14 @@
 #    pip-compile --resolver=backtracking pod_metadata_extractor/runtime/requirements.in
 #
 boto3==1.26.109
-    # via -r pod_metadata_extractor/runtime/requirements.in
+    # via -r requirements.in
 botocore==1.29.109
     # via
     #   boto3
     #   s3transfer
 cachetools==5.3.0
     # via google-auth
-certifi==2022.12.7
+certifi==2023.7.22
     # via
     #   kubernetes
     #   requests
@@ -27,7 +27,7 @@ jmespath==1.0.1
     #   boto3
     #   botocore
 kubernetes==26.1.0
-    # via -r pod_metadata_extractor/runtime/requirements.in
+    # via -r requirements.in
 oauthlib==3.2.2
     # via requests-oauthlib
 pyasn1==0.4.8
