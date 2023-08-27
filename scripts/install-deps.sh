@@ -19,7 +19,7 @@ set -o errexit
 set -o verbose
 
 # Install local CDK CLI version
-npm ci
+npm install
 
 # Install project dependencies
 pip install -r pod_metadata_extractor/runtime/requirements.txt -r requirements.txt
