@@ -20,7 +20,7 @@ charset-normalizer==3.2.0
     # via requests
 google-auth==2.22.0
     # via kubernetes
-idna==3.4
+idna==3.7
     # via requests
 jmespath==1.0.1
     # via
