@@ -135,22 +135,23 @@ def get_pods_info(nodes_azs: dict[str, str]) -> dict[str, str]:
     pods = v1.list_pod_for_all_namespaces(label_selector="app", watch=False)
 
     for pod in pods.items:
+        pp.pprint(pod.metadata.name)
         conditions = pod.status.conditions
-        ready_condition = next(filter(lambda cond: cond.type == "Ready", conditions))
-        pod_creation_time = ready_condition.last_transition_time.strftime(
-            TIME_DATE_FORMAT
-        )
-
-        info = {
-            "name": pod.metadata.name,
-            "ip": pod.status.pod_ip,
-            "app": pod.metadata.labels.get("app", "<none>"),
-            "creation_time": pod_creation_time,
-            "node": pod.spec.node_name,
-            "az": nodes_azs.get(pod.spec.node_name, "<none>"),
-        }
-
-        pods_info.append(info)
+        if conditions:
+            ready_condition = next(filter(lambda cond: hasattr(cond, 'type') and cond.type == "Ready", conditions), None)
+            if ready_condition:
+                pod_creation_time = ready_condition.last_transition_time.strftime(
+                    TIME_DATE_FORMAT
+                )                
+                info = {
+                    "name": pod.metadata.name,
+                    "ip": pod.status.pod_ip,
+                    "app": pod.metadata.labels.get("app", "<none>"),
+                    "creation_time": pod_creation_time,
+                    "node": pod.spec.node_name,
+                    "az": nodes_azs.get(pod.spec.node_name, "<none>"),
+                }
+                pods_info.append(info)                
 
     return pods_info
 
