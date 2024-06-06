@@ -163,7 +163,7 @@ def create_pods_metadata_csv_file(pods_info: dict[str, str]) -> str:
     """
     file_path = f"/tmp/{PODS_METADATA_FILENAME}"
 
-    pod_header_row = ",".join(pods_info[0].keys())
+    pod_header_row = ",".join(["name", "ip", "app", "creation_time", "node", "az"])
     pod_data_rows = [",".join(info.values()) for info in pods_info]
 
     with open(file_path, "w") as f:
