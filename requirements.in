@@ -1,7 +1,6 @@
--c pod_metadata_extractor/runtime/requirements.txt
 aws-cdk-lib==2.95.1
 constructs
 cdk-nag
 
 aws-cdk.aws-lambda-python-alpha
-aws-cdk.aws-glue-alpha.
+aws-cdk.aws-glue-alpha
