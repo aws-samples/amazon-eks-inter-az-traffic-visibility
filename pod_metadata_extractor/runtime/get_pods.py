@@ -29,12 +29,14 @@ logger.setLevel(logging.INFO)
 HTTP_OK = 200
 HTTP_INTERNAL_SERVER_ERROR = 500
 
+DEFAULT_APP_LABEL = "app"
+
 K8S_CLIENT_ROLE_ARN = os.getenv("K8S_CLIENT_ROLE_ARN")
 OUTPUT_BUCKET_NAME = os.getenv("OUTPUT_BUCKET_NAME")
 CURRENT_ACCOUNT_ID = os.getenv("CURRENT_ACCOUNT_ID")
 CLUSTER_NAME = os.getenv("CLUSTER_NAME")
 
-APP_LABEL = os.getenv("app")
+APP_LABEL = os.getenv("APP_LABEL", DEFAULT_APP_LABEL)
 AZ_LABEL = "topology.kubernetes.io/zone"
 
 TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -132,25 +134,31 @@ def get_pods_info(nodes_azs: dict[str, str]) -> dict[str, str]:
     """
     pods_info = []
 
-    pods = v1.list_pod_for_all_namespaces(label_selector="app", watch=False)
+    pods = v1.list_pod_for_all_namespaces(label_selector=APP_LABEL, watch=False)
 
     for pod in pods.items:
         conditions = pod.status.conditions
-        ready_condition = next(filter(lambda cond: cond.type == "Ready", conditions))
+        
+        if not conditions:
+            continue
+        
+        ready_condition = next(filter(lambda cond: getattr(cond, "type", None) == "Ready", conditions), None)
+        
+        if not ready_condition:
+            continue
+        
         pod_creation_time = ready_condition.last_transition_time.strftime(
             TIME_DATE_FORMAT
-        )
-
+        )                
         info = {
             "name": pod.metadata.name,
             "ip": pod.status.pod_ip,
-            "app": pod.metadata.labels.get("app", "<none>"),
+            "app": pod.metadata.labels.get(APP_LABEL, "<none>"),
             "creation_time": pod_creation_time,
             "node": pod.spec.node_name,
             "az": nodes_azs.get(pod.spec.node_name, "<none>"),
         }
-
-        pods_info.append(info)
+        pods_info.append(info)                
 
     return pods_info
 
@@ -161,7 +169,7 @@ def create_pods_metadata_csv_file(pods_info: dict[str, str]) -> str:
     """
     file_path = f"/tmp/{PODS_METADATA_FILENAME}"
 
-    pod_header_row = ",".join(pods_info[0].keys())
+    pod_header_row = ",".join(["name", "ip", "app", "creation_time", "node", "az"])
     pod_data_rows = [",".join(info.values()) for info in pods_info]
 
     with open(file_path, "w") as f:

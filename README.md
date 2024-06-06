@@ -116,6 +116,10 @@ NAME                         READY   STATUS    RESTARTS   AGE   IP              
 server-dep-797d7b54f-b9jf8   1/1     Running   0          61s   192.168.46.80    ip-192-168-51-15.us-east-2.compute.internal    <none>           <none>
 server-dep-797d7b54f-8m6hx   1/1     Running   0          61s   192.168.89.235   ip-192-168-64-199.us-east-2.compute.internal   <none>           <none>
 ```
+### Step 1.5: [Optional] Determine the app label selector
+This solution defaultly uses `app` as the default pod label selector when scanning a kubernetes clusters.  
+To change this default value, go to [pod_metadata_extractor/infrastructure.py](https://github.com/aws-samples/amazon-eks-inter-az-traffic-visibility/blob/dfed5cc22de62817c240a450eab1ae9e0ee27a34/pod_metadata_extractor/infrastructure.py#L29) and edit `APP_LABEL`'s value to your desired label selector value.
+
 
 ### Step 2: Deploy the CDK Stack
 
