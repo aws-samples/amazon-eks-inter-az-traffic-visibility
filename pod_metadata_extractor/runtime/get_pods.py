@@ -138,11 +138,18 @@ def get_pods_info(nodes_azs: dict[str, str]) -> dict[str, str]:
 
     for pod in pods.items:
         conditions = pod.status.conditions
-        ready_condition = next(filter(lambda cond: cond.type == "Ready", conditions))
+        
+        if not conditions:
+            continue
+        
+        ready_condition = next(filter(lambda cond: getattr(cond, "type", None) == "Ready", conditions), None)
+        
+        if not ready_condition:
+            continue
+        
         pod_creation_time = ready_condition.last_transition_time.strftime(
             TIME_DATE_FORMAT
-        )
-
+        )                
         info = {
             "name": pod.metadata.name,
             "ip": pod.status.pod_ip,
@@ -151,8 +158,7 @@ def get_pods_info(nodes_azs: dict[str, str]) -> dict[str, str]:
             "node": pod.spec.node_name,
             "az": nodes_azs.get(pod.spec.node_name, "<none>"),
         }
-
-        pods_info.append(info)
+        pods_info.append(info)                
 
     return pods_info
 
