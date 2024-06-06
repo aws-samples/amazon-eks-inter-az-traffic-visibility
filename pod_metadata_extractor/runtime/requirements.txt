@@ -4,66 +4,97 @@
 #
 #    pip-compile pod_metadata_extractor/runtime/requirements.in
 #
-boto3==1.28.44
-    # via -r requirements.in
-botocore==1.31.44
+boto3==1.34.120
     # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
+    #   -r pod_metadata_extractor/runtime/requirements.in
+botocore==1.34.120
+    # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
     #   boto3
     #   s3transfer
-cachetools==5.3.1
-    # via google-auth
-certifi==2023.7.22
+cachetools==5.3.3
     # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
+    #   google-auth
+certifi==2024.6.2
+    # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
     #   kubernetes
     #   requests
-charset-normalizer==3.2.0
-    # via requests
-google-auth==2.22.0
-    # via kubernetes
-idna==3.4
-    # via requests
+charset-normalizer==3.3.2
+    # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
+    #   requests
+google-auth==2.29.0
+    # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
+    #   kubernetes
+idna==3.7
+    # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
+    #   requests
 jmespath==1.0.1
     # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
     #   boto3
     #   botocore
-kubernetes==27.2.0
-    # via -r requirements.in
+kubernetes==29.0.0
+    # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
+    #   -r pod_metadata_extractor/runtime/requirements.in
 oauthlib==3.2.2
     # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
     #   kubernetes
     #   requests-oauthlib
-pyasn1==0.5.0
+pyasn1==0.6.0
     # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
     #   pyasn1-modules
     #   rsa
-pyasn1-modules==0.3.0
-    # via google-auth
-python-dateutil==2.8.2
+pyasn1-modules==0.4.0
     # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
+    #   google-auth
+python-dateutil==2.9.0.post0
+    # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
     #   botocore
     #   kubernetes
 pyyaml==6.0.1
-    # via kubernetes
-requests==2.31.0
     # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
+    #   kubernetes
+requests==2.32.3
+    # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
     #   kubernetes
     #   requests-oauthlib
-requests-oauthlib==1.3.1
-    # via kubernetes
+requests-oauthlib==2.0.0
+    # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
+    #   kubernetes
 rsa==4.9
-    # via google-auth
-s3transfer==0.6.2
-    # via boto3
+    # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
+    #   google-auth
+s3transfer==0.10.1
+    # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
+    #   boto3
 six==1.16.0
     # via
-    #   google-auth
+    #   -c pod_metadata_extractor/runtime/requirements.txt
     #   kubernetes
     #   python-dateutil
-urllib3==1.26.18
+urllib3==2.2.1
     # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
     #   botocore
-    #   google-auth
     #   kubernetes
     #   requests
-websocket-client==1.6.2
-    # via kubernetes
+websocket-client==1.8.0
+    # via
+    #   -c pod_metadata_extractor/runtime/requirements.txt
+    #   kubernetes
