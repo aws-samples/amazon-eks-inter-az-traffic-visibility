@@ -29,12 +29,14 @@ logger.setLevel(logging.INFO)
 HTTP_OK = 200
 HTTP_INTERNAL_SERVER_ERROR = 500
 
+DEFAULT_APP_LABEL = "app"
+
 K8S_CLIENT_ROLE_ARN = os.getenv("K8S_CLIENT_ROLE_ARN")
 OUTPUT_BUCKET_NAME = os.getenv("OUTPUT_BUCKET_NAME")
 CURRENT_ACCOUNT_ID = os.getenv("CURRENT_ACCOUNT_ID")
 CLUSTER_NAME = os.getenv("CLUSTER_NAME")
 
-APP_LABEL = os.getenv("app")
+APP_LABEL = os.getenv("app", DEFAULT_APP_LABEL)
 AZ_LABEL = "topology.kubernetes.io/zone"
 
 TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
