@@ -1,4 +1,4 @@
-aws-cdk-lib==2.95.1
+aws-cdk-lib==2.146.0
 constructs
 cdk-nag
 

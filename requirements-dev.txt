@@ -10,7 +10,7 @@ astroid==3.2.2
     # via pylint
 authlib==1.3.1
     # via safety
-bandit==1.7.8
+bandit==1.7.9
     # via -r requirements-dev.in
 black==24.4.2
     # via -r requirements-dev.in
@@ -27,7 +27,7 @@ click==8.1.7
     #   typer
 colorama==0.4.6
     # via radon
-coverage==7.5.3
+coverage==7.5.4
     # via -r requirements-dev.in
 cryptography==42.0.8
     # via authlib
@@ -37,7 +37,7 @@ dparse==0.6.4b0
     # via
     #   safety
     #   safety-schemas
-flake8==7.0.0
+flake8==7.1.0
     # via -r requirements-dev.in
 idna==3.7
     # via requests
@@ -67,7 +67,7 @@ mypy-extensions==1.0.0
     # via
     #   black
     #   mypy
-packaging==24.0
+packaging==24.1
     # via
     #   black
     #   dparse
@@ -82,11 +82,11 @@ platformdirs==4.2.2
     # via
     #   black
     #   pylint
-pycodestyle==2.11.1
+pycodestyle==2.12.0
     # via flake8
 pycparser==2.22
     # via cffi
-pydantic==2.7.3
+pydantic==2.7.4
     # via
     #   safety
     #   safety-schemas
@@ -96,9 +96,9 @@ pyflakes==3.2.0
     # via flake8
 pygments==2.18.0
     # via rich
-pylint==3.2.2
+pylint==3.2.3
     # via -r requirements-dev.in
-pyyaml==6.0.1
+pyyaml==6.0.2rc1
     # via
     #   bandit
     #   xenon
@@ -121,7 +121,7 @@ ruamel-yaml==0.18.6
     #   safety-schemas
 ruamel-yaml-clib==0.2.8
     # via ruamel-yaml
-safety==3.2.1
+safety==3.2.3
     # via -r requirements-dev.in
 safety-schemas==0.0.2
     # via safety
@@ -137,7 +137,7 @@ tomlkit==0.12.5
     # via pylint
 typer==0.12.3
     # via safety
-typing-extensions==4.12.1
+typing-extensions==4.12.2
     # via
     #   -c requirements.txt
     #   mypy
@@ -146,7 +146,7 @@ typing-extensions==4.12.1
     #   safety
     #   safety-schemas
     #   typer
-urllib3==2.2.1
+urllib3==2.2.2
     # via
     #   requests
     #   safety
