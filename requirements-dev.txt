@@ -29,7 +29,7 @@ colorama==0.4.6
     # via radon
 coverage==7.5.4
     # via -r requirements-dev.in
-cryptography==42.0.8
+cryptography==43.0.1
     # via authlib
 dill==0.3.8
     # via pylint
