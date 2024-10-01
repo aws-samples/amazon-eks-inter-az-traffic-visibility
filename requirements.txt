@@ -4,15 +4,15 @@
 #
 #    pip-compile requirements.in
 #
-attrs==23.2.0
+attrs==24.2.0
     # via
     #   cattrs
     #   jsii
-aws-cdk-asset-awscli-v1==2.2.202
+aws-cdk-asset-awscli-v1==2.2.205
     # via aws-cdk-lib
 aws-cdk-asset-kubectl-v20==2.1.2
     # via aws-cdk-lib
-aws-cdk-asset-node-proxy-agent-v6==2.0.3
+aws-cdk-asset-node-proxy-agent-v6==2.1.0
     # via aws-cdk-lib
 aws-cdk-aws-glue-alpha==2.146.0a0
     # via -r requirements.in
@@ -26,7 +26,7 @@ aws-cdk-lib==2.146.0
     #   cdk-nag
 cattrs==23.2.3
     # via jsii
-cdk-nag==2.28.148
+cdk-nag==2.28.195
     # via -r requirements.in
 constructs==10.3.0
     # via
@@ -35,9 +35,9 @@ constructs==10.3.0
     #   aws-cdk-aws-lambda-python-alpha
     #   aws-cdk-lib
     #   cdk-nag
-importlib-resources==6.4.0
+importlib-resources==6.4.5
     # via jsii
-jsii==1.100.0
+jsii==1.103.1
     # via
     #   aws-cdk-asset-awscli-v1
     #   aws-cdk-asset-kubectl-v20
