@@ -163,9 +163,15 @@ Create a ClusterRole and binding for the **Pod Metadata Extractor** AWS Lambda F
 kubectl apply -f kubernetes/pod-metadata-extractor-clusterrole.yaml
 ```
 
-#### Append a role mapping to `ConfigMap/aws-auth`
+## Granting IAM Role Access to EKS Cluster
 
->⚠ **We recommend using eksctl, or another tool, to edit the ConfigMap. For information about other tools you can use, see [Use tools](https://aws.github.io/aws-eks-best-practices/security/docs/iam/#use-tools-to-make-changes-to-the-aws-auth-configmap) to make changes to the aws-authConfigMap in the Amazon EKS best practices guides. An improperly formatted aws-auth ConfigMap can cause you to lose access to your cluster**
+There are two methods to grant IAM role access to your EKS cluster. Choose either the traditional `aws-auth` ConfigMap approach or the newer `AccessEntry` approach.
+
+### Option 1: Using aws-auth ConfigMap (Traditional Method)
+
+>⚠ **We recommend using eksctl, or another tool, to edit the ConfigMap. For information about other tools you can use, see [Use tools](https://aws.github.io/aws-eks-best-practices/security/docs/iam/#use-tools-to-make-changes-to-the-aws-auth-configmap) to make changes to the aws-authConfigMap in the Amazon EKS best practices guides. An improperly formatted aws-auth ConfigMap can cause you to lose access to your cluster.**
+
+#### Map IAM role to aws-auth ConfigMap
 
 ```
 eksctl create iamidentitymapping \
@@ -175,7 +181,7 @@ eksctl create iamidentitymapping \
 --group "eks-inter-az-visibility-group"
 ```
 
-#### Validate
+#### Validation of aws-auth ConfigMap
 
 ```
 eksctl get iamidentitymapping --cluster ${CLUSTERNAME}
@@ -187,6 +193,73 @@ Expected output:
 ARN                                                                                             USERNAME                                GROUPS                                  ACCOUNT
 arn:aws:iam::555555555555:role/eksctl-cross-az-nodegroup-ng-1-NodeInstanceRole-IPHG3L5AXR3      system:node:{{EC2PrivateDNSName}}       system:bootstrappers,system:nodes
 arn:aws:iam::555555555555:role/pod-metadata-extractor-role                                      eks-inter-az-visibility-binding         eks-inter-az-visibility-group
+```
+
+
+### Option 2: Using AccessEntry (Recommended Method)
+
+AccessEntry is a new way to replace aws-auth ConfigMap, making the mapping between IAM principals and Kubernetes RBAC more secure and easier to manage.
+
+#### Set AWS Account ID environment variable
+
+```
+export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
+echo $ACCOUNT_ID
+```
+
+#### Create Access Entry for IAM role
+```
+aws eks create-access-entry \
+  --cluster-name ${CLUSTERNAME} \
+  --principal-arn ${POD_METADATA_EXTRACTOR_IAM_ROLE} \
+  --username "eks-inter-az-visibility-binding" \
+  --kubernetes-groups "eks-inter-az-visibility-group"
+```
+
+#### Associate view permission policy to the created AccessEntry
+
+```
+aws eks associate-access-policy \
+  --cluster-name ${CLUSTERNAME} \
+  --principal-arn ${POD_METADATA_EXTRACTOR_IAM_ROLE} \
+  --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy \
+  --access-scope '{"type": "cluster"}'
+```
+
+#### Validation of AccessEntry
+
+```
+aws eks list-access-entries --cluster-name ${CLUSTERNAME}
+
+aws eks describe-access-entry --cluster-name ${CLUSTERNAME} --principal-arn arn:aws:iam::${ACCOUNT_ID}:role/pod-metadata-extractor-role
+
+```
+
+
+Expected output:
+
+```
+{
+    "accessEntries": [
+        "arn:aws:iam::555555555555:role/pod-metadata-extractor-role"
+    ]
+}
+{
+    "accessEntry": {
+        "clusterName": "${CLUSTERNAME}",
+        "principalArn": "arn:aws:iam::555555555555:role/pod-metadata-extractor-role",
+        "kubernetesGroups": [
+            "eks-inter-az-visibility-group"
+        ],
+        "accessEntryArn": "arn:aws:eks:${AWS_REGION}:555555555555:access-entry/${CLUSTERNAME}/role/555555555555/pod-metadata-extractor-role/54cae684-118a-2dd9-2a3d-01868c5231fa",
+        "createdAt": "2025-03-25T20:20:17.496000+09:00",
+        "modifiedAt": "2025-03-25T20:20:17.496000+09:00",
+        "tags": {},
+        "username": "eks-inter-az-visibility-binding",
+        "type": "STANDARD"
+    }
+}
 ```
 
 >⚠ **At this point wait few minutes allowing the VPC Flow Logs to publish, then cont. to Step 3**
