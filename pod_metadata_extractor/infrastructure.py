@@ -27,6 +27,8 @@ from aws_cdk import lambda_layer_awscli
 from constructs import Construct
 
 APP_LABEL = "app"
+COMPONENT_LABEL = "component"
+
 
 class PodMetaDataExtractor(Construct):
     def __init__(
@@ -99,6 +101,7 @@ class PodMetaDataExtractor(Construct):
                 "REGION": Stack.of(self).region,
                 "CLUSTER_NAME": eks_cluster.cluster_name,
                 "APP_LABEL": APP_LABEL,
+                "COMPONENT_LABEL": COMPONENT_LABEL,
                 "OUTPUT_BUCKET_NAME": bucket.bucket_name,
                 "CURRENT_ACCOUNT_ID": Stack.of(self).account,
             },
