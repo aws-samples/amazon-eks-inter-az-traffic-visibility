@@ -17,6 +17,7 @@ from aws_cdk import aws_glue_alpha as glue_alpha
 
 pod_table_columns = [
     glue_alpha.Column(name="name", type=glue_alpha.Schema.STRING),
+    glue_alpha.Column(name="namespace", type=glue_alpha.Schema.STRING),
     glue_alpha.Column(name="ip", type=glue_alpha.Schema.STRING),
     glue_alpha.Column(name="app", type=glue_alpha.Schema.STRING),
     glue_alpha.Column(name="component", type=glue_alpha.Schema.STRING),

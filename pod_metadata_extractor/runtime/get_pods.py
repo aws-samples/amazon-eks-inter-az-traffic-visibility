@@ -157,6 +157,7 @@ def get_pods_info(nodes_azs: dict[str, str]) -> dict[str, str]:
         )
         info = {
             "name": pod.metadata.name,
+            "namespace": pod.metadata.namespace,
             "ip": pod.status.pod_ip,
             "app": pod.metadata.labels.get(APP_LABEL, "<none>"),
             "component": pod.metadata.labels.get(COMPONENT_LABEL, "<none>"),

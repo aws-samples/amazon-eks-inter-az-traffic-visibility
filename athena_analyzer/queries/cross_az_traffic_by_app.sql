@@ -24,6 +24,7 @@ and from_unixtime("{vpc_flow_logs_table_name}".start)>(CURRENT_TIMESTAMP - ({inv
 egress_flows_of_pods_with_status AS (
 SELECT
 "{pods_table_name}".name as srcpodname,
+"{pods_table_name}".namespace as srcpodnamespace,
 "{pods_table_name}".app as srcpodapp,
 "{pods_table_name}".component as srcpodcomp,
 pkt_srcaddr as srcaddr,
@@ -41,10 +42,12 @@ cross_az_traffic_by_pod as (
 SELECT
 srcaddr,
 srcpodname,
+srcpodnamespace,
 srcpodapp,
 srcpodcomp,
 dstaddr,
 "{pods_table_name}".name as dstpodname,
+"{pods_table_name}".namespace as dstpodnamespace,
 "{pods_table_name}".app as dstpodapp,
 "{pods_table_name}".component as dstpodcomp,
 srcazid,
@@ -57,7 +60,7 @@ LEFT JOIN ip_addresses_and_az_mapping ON dstaddr = ipaddress
 WHERE ip_addresses_and_az_mapping.az_id != srcazid
 )
 
-SELECT date_trunc('MINUTE', from_unixtime(start)) AS time, CONCAT(srcpodapp, '/', srcpodcomp, ' -> ', dstpodapp, '/', dstpodcomp) as inter_az_traffic, sum(bytes) as total_bytes
+SELECT date_trunc('MINUTE', from_unixtime(start)) AS time, CONCAT(srcpodnamespace, '/', srcpodapp, '/', srcpodcomp, ' -> ', dstpodnamespace, '/', dstpodapp, '/', dstpodcomp) as inter_az_traffic, sum(bytes) as total_bytes
 FROM cross_az_traffic_by_pod
 WHERE srcpodapp!='<none>' AND dstpodapp!='<none>'
 GROUP BY date_trunc('MINUTE', from_unixtime(start)), CONCAT(srcpodapp, '/', srcpodcomp, ' -> ', dstpodapp, '/', dstpodcomp)
