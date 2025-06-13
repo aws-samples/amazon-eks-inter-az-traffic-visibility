@@ -136,37 +136,47 @@ def get_pods_info(nodes_azs: dict[str, str]) -> dict[str, str]:
     """
     pods_info = []
 
-    pods = v1.list_pod_for_all_namespaces(label_selector=APP_LABEL, watch=False)
+    label_list = [
+            "app",
+            "app.kubernetes.io/name",
+            "postgres-operator.crunchydata.com/cluster",
+    ]
 
-    for pod in pods.items:
-        conditions = pod.status.conditions
+    for label in label_list:
+        pods = v1.list_pod_for_all_namespaces(label_selector=label, watch=False)
 
-        if not conditions:
-            continue
+        for pod in pods.items:
+            conditions = pod.status.conditions
 
-        ready_condition = next(
-            filter(lambda cond: getattr(cond, "type", None) == "Ready", conditions),
-            None,
-        )
+            if not conditions:
+                continue
 
-        if not ready_condition:
-            continue
+            ready_condition = next(
+                filter(lambda cond: getattr(cond, "type", None) == "Ready", conditions),
+                None,
+            )
 
-        pod_creation_time = ready_condition.last_transition_time.strftime(
-            TIME_DATE_FORMAT
-        )
-        info = {
-            "name": pod.metadata.name,
-            "namespace": pod.metadata.namespace,
-            "ip": pod.status.pod_ip,
-            "app": pod.metadata.labels.get(APP_LABEL, "<none>"),
-            "component": pod.metadata.labels.get(COMPONENT_LABEL, "<none>"),
-            "creation_time": pod_creation_time,
-            "node": pod.spec.node_name,
-            "az": nodes_azs.get(pod.spec.node_name, "<none>"),
-        }
-        if pod.status.pod_ip:
-            pods_info.append(info)
+            if not ready_condition:
+                continue
+
+            pod_creation_time = ready_condition.last_transition_time.strftime(
+                TIME_DATE_FORMAT
+            )
+            info = {
+                "name": pod.metadata.name,
+                "namespace": pod.metadata.namespace,
+                "ip": pod.status.pod_ip,
+                "app": pod.metadata.labels.get(label, "<none>"),
+                "component": pod.metadata.labels.get(COMPONENT_LABEL, "<none>"),
+                "creation_time": pod_creation_time,
+                "node": pod.spec.node_name,
+                "az": nodes_azs.get(pod.spec.node_name, "<none>"),
+            }
+            if pod.status.pod_ip:
+                pods_info.append(info)
+
+    # Remove duplicates from pods_info
+    pods_info = [dict(t) for t in {tuple(d.items()) for d in pods_info}]
 
     return pods_info
 
