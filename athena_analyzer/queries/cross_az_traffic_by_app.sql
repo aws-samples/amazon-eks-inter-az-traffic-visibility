@@ -63,5 +63,5 @@ WHERE ip_addresses_and_az_mapping.az_id != srcazid
 SELECT date_trunc('MINUTE', from_unixtime(start)) AS time, CONCAT(srcpodnamespace, '/', srcpodapp, '/', srcpodcomp, ' -> ', dstpodnamespace, '/', dstpodapp, '/', dstpodcomp) as inter_az_traffic, sum(bytes) as total_bytes
 FROM cross_az_traffic_by_pod
 WHERE srcpodapp!='<none>' AND dstpodapp!='<none>'
-GROUP BY date_trunc('MINUTE', from_unixtime(start)), CONCAT(srcpodapp, '/', srcpodcomp, ' -> ', dstpodapp, '/', dstpodcomp)
+GROUP BY date_trunc('MINUTE', from_unixtime(start)), CONCAT(srcpodnamespace, '/', srcpodapp, '/', srcpodcomp, ' -> ', dstpodnamespace, '/', dstpodapp, '/', dstpodcomp)
 ORDER BY time, total_bytes DESC
