@@ -130,53 +130,72 @@ def get_nodes_availability_zones() -> dict[str, str]:
     return nodes_azs
 
 
-def get_pods_info(nodes_azs: dict[str, str]) -> dict[str, str]:
-    """
-    Requests pods metadata from EKS
-    """
+def build_exclusions(exclude_labels: list[str]) -> str:
+    """Create exclusions string for label selector."""
+    return "".join(f",!{label}" for label in exclude_labels)
+
+
+def fetch_pods_for_label(
+    app_label: str, component_label: str, exclusions: str, nodes_azs: dict[str, str]
+) -> list[dict[str, str]]:
+    """Fetch pod metadata for a given app and component label."""
+    pods = v1.list_pod_for_all_namespaces(
+        label_selector=f"{app_label}{exclusions}", watch=False
+    )
     pods_info = []
 
-    label_list = [
-            "app",
-            "app.kubernetes.io/name",
+    for pod in pods.items:
+        conditions = pod.status.conditions
+        if not conditions:
+            continue
+
+        ready_condition = next(
+            (cond for cond in conditions if getattr(cond, "type", None) == "Ready"),
+            None,
+        )
+        if not ready_condition:
+            continue
+
+        pod_creation_time = ready_condition.last_transition_time.strftime(
+            TIME_DATE_FORMAT
+        )
+        pod_info = {
+            "name": pod.metadata.name,
+            "namespace": pod.metadata.namespace,
+            "ip": pod.status.pod_ip,
+            "app": pod.metadata.labels.get(app_label, "<none>"),
+            "component": pod.metadata.labels.get(component_label, "<none>"),
+            "creation_time": pod_creation_time,
+            "node": pod.spec.node_name,
+            "az": nodes_azs.get(pod.spec.node_name, "<none>"),
+        }
+        if pod.status.pod_ip:
+            pods_info.append(pod_info)
+
+    return pods_info
+
+
+def get_pods_info(nodes_azs: dict[str, str]) -> dict[str, str]:
+    """
+    Requests pods metadata from EKS.
+    """
+    pods_info = []
+    label_pairs = [
+        ("app", "component"),
+        ("app.kubernetes.io/name", "app.kubernetes.io/part-of"),
+        (
+            "postgres-operator.crunchydata.com/data",
             "postgres-operator.crunchydata.com/cluster",
+        ),
     ]
+    exclude_labels = []
 
-    for label in label_list:
-        pods = v1.list_pod_for_all_namespaces(label_selector=label, watch=False)
-
-        for pod in pods.items:
-            conditions = pod.status.conditions
-
-            if not conditions:
-                continue
-
-            ready_condition = next(
-                filter(lambda cond: getattr(cond, "type", None) == "Ready", conditions),
-                None,
-            )
-
-            if not ready_condition:
-                continue
-
-            pod_creation_time = ready_condition.last_transition_time.strftime(
-                TIME_DATE_FORMAT
-            )
-            info = {
-                "name": pod.metadata.name,
-                "namespace": pod.metadata.namespace,
-                "ip": pod.status.pod_ip,
-                "app": pod.metadata.labels.get(label, "<none>"),
-                "component": pod.metadata.labels.get(COMPONENT_LABEL, "<none>"),
-                "creation_time": pod_creation_time,
-                "node": pod.spec.node_name,
-                "az": nodes_azs.get(pod.spec.node_name, "<none>"),
-            }
-            if pod.status.pod_ip:
-                pods_info.append(info)
-
-    # Remove duplicates from pods_info
-    pods_info = [dict(t) for t in {tuple(d.items()) for d in pods_info}]
+    for app_label, component_label in label_pairs:
+        exclusions = build_exclusions(exclude_labels)
+        pods_info.extend(
+            fetch_pods_for_label(app_label, component_label, exclusions, nodes_azs)
+        )
+        exclude_labels.append(app_label)  # Add app_label to exclusions after fetching.
 
     return pods_info
 
