@@ -221,6 +221,30 @@ This flow can be used if batch processing background flow is desired in cases yo
 
 *See full blog for detailed considerations*
 
+## Usage Guide
+
+### 1. Verification (Manual Trigger)
+To manually trigger a new analysis and view results:
+
+```bash
+# 1. Start Analysis Pipeline
+export SM_ARN=$(aws stepfunctions list-state-machines --query "stateMachines[?contains(name, 'pod-metadata')].stateMachineArn" --output text)
+aws stepfunctions start-execution --state-machine-arn $SM_ARN
+
+# 2. Wait ~1-2 minutes for execution to complete
+
+# 3. Query Results
+export RESULT_LOC="s3://$(aws s3 ls | grep athena-results | awk '{print $3}')/"
+aws athena start-query-execution \
+    --query-string 'SELECT * FROM "eks-inter-az-visibility"."athena-results-table" ORDER BY "timestamp" DESC, "bytes_transfered";' \
+    --result-configuration OutputLocation=$RESULT_LOC
+```
+
+### 2. Automated Monitoring
+- The system automatically runs **every hour** via EventBridge.
+- You can view the data anytime by running the Athena query above.
+
+
 ## Cleanup
 
 ### Destroy the CDK Stack
